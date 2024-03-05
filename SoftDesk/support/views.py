@@ -20,7 +20,7 @@ class ProjectViewset(ModelViewSet):
     def get_queryset(self):
         print(self.request.user)
         #return Project.objects.all()
-        return self.queryset.filter(Q(author = self.request.user) | Q(contributor__user = self.request.user))
+        return Project.objects.filter(Q(author = self.request.user) | Q(contributor__user = self.request.user))
 
     #Ici le serializer sait que author est en read only mais pour le modèle c'est un champ obligatoire, ici la vue indique au modèle
     # que le champ author sera forcément l'utilisateur.
@@ -34,7 +34,7 @@ class IssueViewset(ModelViewSet):
 
     #à quoi sert cette fonction dans la fonction suivante?
     def get_queryset(self):
-        return self.queryset.filter(Q(author = self.request.user) | Q(project__contributor__user = self.request.user))
+        return Issue.objects.filter(Q(author = self.request.user) | Q(project__contributor__user = self.request.user))
 
     #on prend l'user de chaque contributeur du projet, il faut être dans cette liste d'user pour qua la vue dise au modèle que l'auteur est l'user.
     def perform_create(self, serializer):
@@ -51,7 +51,7 @@ class CommentViewset(ModelViewSet):
     permission_classes = [IsAuthenticated, IsAuthorOrReadOnly]
 
     def get_queryset(self):
-        return self.queryset.filter(Q(author = self.request.user) | Q(issue__project__contributor__user = self.request.user))
+        return Comment.objects.filter(Q(author = self.request.user) | Q(issue__project__contributor__user = self.request.user))
 
     def perform_create(self, serializer):
         issue = serializer.validated_data['issue']
@@ -66,7 +66,7 @@ class ContributorViewset(ModelViewSet):
     serializer_class = ContributorSerializer
     permission_classes = [IsAuthenticated]
     def get_queryset(self):
-        return self.queryset.filter(Q(project__author = self.request.user) | Q(project__contributor__user = self.request.user))
+        return Contributor.objects.filter(Q(project__author = self.request.user) | Q(project__contributor__user = self.request.user))
     
     #Permet de faire que seul l'auteur d'un projet peut ajouter un contributeur au projet.
     def perform_create(self, serializer):
